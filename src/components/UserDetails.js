@@ -14,7 +14,7 @@ function UserDetails({ user, isOnline }) {
       try {
         const response = await fetch(user.repos_url);
         const data = await response.json();
-        if (isMounted) {
+        if (isMounted && isOnline) {
           setRepos(data);
         }
       } catch (err) {
@@ -29,15 +29,7 @@ function UserDetails({ user, isOnline }) {
     };
   }, [user, isOnline]);
 
-  if (!isOnline) {
-    return (
-      <div className='error'>
-        You are currently offline. Please check your internet connection.
-      </div>
-    );
-  }
-
-  if (!user) {
+  if (!isOnline || !user) {
     return null;
   }
 

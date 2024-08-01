@@ -6,6 +6,7 @@ import OfflineAlert from './components/OfflineAlert';
 import { checkOnlineStatus } from './utilities/checkOnlineStatus';
 
 function App() {
+  const [username, setUsername] = useState('');
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState('');
   const [isOnline, setIsOnline] = useState(true);
@@ -41,6 +42,10 @@ function App() {
       const online = await checkOnlineStatus();
       if (isMounted) {
         setIsOnline(online);
+        if (!online) {
+          setUsername('');
+          setUserData(null);
+        }
       }
     };
 
@@ -53,9 +58,19 @@ function App() {
     };
   }, []);
 
+  const handleClear = () => {
+    setUserData(null);
+    setUsername('');
+    setError('');
+  }
+
   return (
     <div className="App">
-      <SearchBox onSearch={fetchUserData} />
+      <SearchBox
+        username={username}
+        setUsername={setUsername}
+        onSearch={fetchUserData}
+        onClear={handleClear} />
       {error && <p className="error">{error}</p>}
       <OfflineAlert isOnline={isOnline} />
       {userData && <UserDetails user={userData} isOnline={isOnline} />}

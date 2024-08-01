@@ -1,9 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { debounce } from '../utilities/debounce';
 
-function SearchBox({ onSearch, onClear }) {
-  const [username, setUsername] = useState('');
-
+function SearchBox({ username, setUsername, onSearch, onClear }) {
   const debouncedSearch = useCallback(
     debounce((username) => {
       if (username) {
@@ -17,15 +15,19 @@ function SearchBox({ onSearch, onClear }) {
     if (username) {
       debouncedSearch(username);
     } else {
-      debouncedSearch.cancel && debouncedSearch.cancel(); // Cancel any pending debounced calls if cancel method exists
-      if (onClear && typeof onClear === 'function') {
-        onClear();
+      if (debouncedSearch.cancel) {
+        debouncedSearch.cancel(); // Cancel any pending debounced calls if cancel method exists
+      }
+      if (onClear) {
+        onClear(); // Call the onClear callback to clear user data
       }
     }
 
     // Cleanup the debounce function on component unmount
     return () => {
-      debouncedSearch.cancel && debouncedSearch.cancel();
+      if (debouncedSearch.cancel) {
+        debouncedSearch.cancel();
+      }
     };
   }, [username]);
 
