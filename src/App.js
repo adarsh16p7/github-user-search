@@ -1,66 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import './App.css';
 import SearchBox from './components/SearchBox';
 import UserDetails from './components/UserDetails';
 import OfflineAlert from './components/OfflineAlert';
-import { checkOnlineStatus } from './utilities/checkOnlineStatus';
+import { useUserData } from './hooks/useUserData';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
 
 function App() {
-  const [username, setUsername] = useState('');
-  const [userData, setUserData] = useState(null);
-  const [error, setError] = useState('');
-  const [isOnline, setIsOnline] = useState(true);
-
-  const fetchUserData = async (username) => {
-    if (!username) {
-      setUserData(null);
-      setError('');
-      return;
-    }
-
-    try {
-      const response = await axios.get(`https://api.github.com/users/${username}`);
-      setUserData(response.data);
-      setError('');
-    } catch (err) {
-      if (err.response && err.response.status === 404) {
-        setError('User not found');
-      } else {
-        setError('An error occurred while fetching data');
-      }
-      setUserData(null);
-    }
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const updateOnlineStatus = async () => {
-      const online = await checkOnlineStatus();
-      if (isMounted) {
-        setIsOnline(online);
-        if (!online) {
-          setUsername('');
-          setUserData(null);
-        }
-      }
-    };
-
-    updateOnlineStatus();
-    const intervalId = setInterval(updateOnlineStatus, 2000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, []);
+  const [username, setUsername] = React.useState('');
+  const { userData, error, fetchUserData, clearUserData } = useUserData();
+  const isOnline = useOnlineStatus(setUsername);
 
   const handleClear = () => {
-    setUserData(null);
     setUsername('');
-    setError('');
-  }
+    clearUserData();
+  };
 
   return (
     <div className="App">
