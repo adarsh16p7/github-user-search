@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function UserDetails({ user, isOnline }) {
   const [repos, setRepos] = useState([]);
@@ -12,10 +13,9 @@ function UserDetails({ user, isOnline }) {
       }
 
       try {
-        const response = await fetch(user.repos_url);
-        const data = await response.json();
+        const response = await axios.get(user.repos_url);
         if (isMounted && isOnline) {
-          setRepos(data);
+          setRepos(response.data);
         }
       } catch (err) {
         console.error('Failed to fetch repositories', err);

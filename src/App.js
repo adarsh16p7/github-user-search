@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 import SearchBox from './components/SearchBox';
 import UserDetails from './components/UserDetails';
@@ -13,24 +14,21 @@ function App() {
 
   const fetchUserData = async (username) => {
     if (!username) {
-      setUserData(null); // Clear user data if username is empty
+      setUserData(null);
       setError('');
       return;
     }
 
     try {
-      const response = await fetch(`https://api.github.com/users/${username}`);
-      if (response.status === 404) {
-        throw new Error('User not found');
-      }
-      if (!response.ok) {
-        throw new Error('An error occurred while fetching data');
-      }
-      const data = await response.json();
-      setUserData(data);
+      const response = await axios.get(`https://api.github.com/users/${username}`);
+      setUserData(response.data);
       setError('');
     } catch (err) {
-      setError(err.message);
+      if (err.response && err.response.status === 404) {
+        setError('User not found');
+      } else {
+        setError('An error occurred while fetching data');
+      }
       setUserData(null);
     }
   };
@@ -49,8 +47,8 @@ function App() {
       }
     };
 
-    updateOnlineStatus(); // Initial check
-    const intervalId = setInterval(updateOnlineStatus, 2000); // Check every 2 seconds
+    updateOnlineStatus();
+    const intervalId = setInterval(updateOnlineStatus, 2000);
 
     return () => {
       isMounted = false;
